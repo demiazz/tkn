@@ -49,7 +49,7 @@ section "Constants Refresher" do
     C = Class.new(D) do
       include M
     end
-    
+
     # class name comes from the constant
     C.name # => "C"
   EOS
@@ -79,7 +79,7 @@ section "Constants Refresher" do
 
   slide <<-EOS, :code
     # rubinius/kernel/common/module.rb
-    
+
     class Module
       attr_reader :constant_table
       attr_writer :method_table
@@ -99,7 +99,7 @@ section "Constants Refresher" do
       class SAXParser
       end
     end
-    
+
     # equivalent modulus details to
     module XML
       SAXParser = Class.new
@@ -362,7 +362,7 @@ section "Request Flow" do
       * Locales
 
       * Application files:
-          
+
           - Ruby files under autoload_*
 
           - db/(schema.rb|structure.sql)

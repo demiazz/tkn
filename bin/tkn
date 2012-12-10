@@ -1,21 +1,22 @@
-#!/usr/bin/env ruby -U
+#!/usr/bin/env ruby
 # encoding: utf-8
 
 require 'io/console'
 require 'active_support/core_ext/string/strip'
 require 'pygments'
+require 'pry'
 
 
 #
 # --- DSL -------------------------------------------------------------
 #
 
-def slide(content, format=:block)
-  $slides << [content.strip_heredoc, format]
+def slide(content, format=:block, options = {})
+  $slides << [content.strip_heredoc, format, options]
 end
 
 def section(content)
-  $slides << [content, :section]
+  $slides << [content, :section, {}]
   yield
 end
 
@@ -71,7 +72,11 @@ end
 # Returns a string that the caller has to print as is to get the slide
 # properly rendered. The caller is responsible for clearing the screen.
 def render(slide)
-  send("render_#{slide[1]}", slide[0]) if slide[0] =~ /\S/
+  if slide[2].any?
+    send("render_#{slide[1]}", slide[0], slide[2]) if slide[0] =~ /\S/
+  else
+    send("render_#{slide[1]}", slide[0]) if slide[0] =~ /\S/
+  end
 end
 
 # Renders the content by centering each individual line.
@@ -85,7 +90,7 @@ def render_center(content)
       col = [1, 1 + (ncols - ansi_length(line.chomp))/2].max
       str << cursor_at(row + i, col) + line
     end
-  end  
+  end
 end
 
 # Renders a section banner.
@@ -101,8 +106,12 @@ def render_section(content)
 end
 
 # Renders Ruby source code.
-def render_code(code)
-  render_block(Pygments.highlight(code, formatter: 'terminal256', lexer: 'ruby', options: {style: 'bw'}))
+def render_code(code, options = {})
+  formatter = options[:formatter] || 'terminal256'
+  lang      = options[:lang]      || 'ruby'
+  style     = options[:style]     || 'tango'
+
+  render_block(Pygments.highlight(code, formatter: formatter, lexer: lang, options: {style: style}))
 end
 
 # Centers the whole content as a block. That is, the format within the content
@@ -113,10 +122,10 @@ def render_block(content)
 
   nlines = content.count("\n")
   row = [1, 1 + (nrows - nlines)/2].max
-  
+
   width = width(content)
   col = [1, 1 + (ncols - width)/2].max
-  
+
   content.gsub(/^/) do
     cursor_at(row, col).tap { row += 1 }
   end
