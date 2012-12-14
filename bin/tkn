@@ -94,7 +94,9 @@ def render_center(content)
 end
 
 # Renders a section banner.
-def render_section(content)
+def render_section(raw_content)
+  content = "    \e[1m#{raw_content}\e[0m     "
+
   nrows, ncols = winsize
   width = width(content)
 
